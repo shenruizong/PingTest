@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
+using System.Text.RegularExpressions;
+using System.Data;
 
 namespace PingTest
 {
@@ -29,10 +31,29 @@ namespace PingTest
             string AllIp = IpListBox.Text;
             AllIp = AllIp.Replace("\r", "");
             string[] IpList = AllIp.Split('\n');
+            DatabaseDataSet.ipsDataTable ipsDt = new DatabaseDataSet.ipsDataTable();
             foreach (string ip in IpList)
             {
-                MessageBox.Show(GetstringIpAddress(ip));
+                Regex rx = new Regex(@"((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))");
+                if (rx.IsMatch(ip))
+                {
+                    DataRow row = ipsDt.NewRow();
+                    row["ip"] = ip;
+                    row["country"] = GetstringIpAddress(ip);
+                    ipsDt.Rows.Add(ipsDt);
+                }
             }
+            DatabaseDataSetTableAdapters.ipsTableAdapter ipsTa = new DatabaseDataSetTableAdapters.ipsTableAdapter();
+            try
+            {
+                ipsTa.Update(ipsDt);
+                ipsTa.Fill(PublicClass.ipsDataTable);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            
         }
         /// <summary>  
         /// 根据IP 获取物理地址  
@@ -54,7 +75,10 @@ namespace PingTest
                             {
                                 stringIpAddress = string.Format("{0}", read.Value).ToString().Trim();//赋值  
                                 int index = stringIpAddress.IndexOf(" ");
-                                stringIpAddress = stringIpAddress.Substring(0,index);
+                                if (index != -1)
+                                {
+                                    stringIpAddress.Substring(0, index);
+                                }
                             }
                             break;
                         //other  
