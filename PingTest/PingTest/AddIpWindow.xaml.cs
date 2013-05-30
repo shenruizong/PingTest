@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Data;
+using System.Net;
 
 namespace PingTest
 {
@@ -40,7 +41,7 @@ namespace PingTest
                     DataRow row = ipsDt.NewRow();
                     row["ip"] = ip;
                     row["country"] = GetstringIpAddress(ip);
-                    ipsDt.Rows.Add(ipsDt);
+                    ipsDt.Rows.Add(row);
                 }
             }
             DatabaseDataSetTableAdapters.ipsTableAdapter ipsTa = new DatabaseDataSetTableAdapters.ipsTableAdapter();
@@ -53,6 +54,7 @@ namespace PingTest
             {
 
             }
+            this.Close();
             
         }
         /// <summary>  
@@ -62,30 +64,35 @@ namespace PingTest
         /// <returns></returns>  
         public static string GetstringIpAddress(string strIP)//strIP为IP  
         {
-            string sURL = "http://www.youdao.com/smartresult-xml/search.s?type=ip&q=" + strIP + "";//youdao的URL  
-            string stringIpAddress = "";
-            using (XmlReader read = XmlReader.Create(sURL))//获取youdao返回的xml格式文件内容  
+
+            string m_IpAddress = strIP.Trim();
+
+            //string[] ip = ipAddress.Split('.');
+           // ipAddress = ip[0] + "." + ip[1] + ".1.1";
+
+            WebClient client = new WebClient();
+            client.Encoding = System.Text.Encoding.GetEncoding("GB2312");
+            string html;
+            try
             {
-                while (read.Read())
-                {
-                    switch (read.NodeType)
-                    {
-                        case XmlNodeType.Text://取xml格式文件当中的文本内容  
-                            if (string.Format("{0}", read.Value).ToString().Trim() != strIP)
-                            {
-                                stringIpAddress = string.Format("{0}", read.Value).ToString().Trim();//赋值  
-                                int index = stringIpAddress.IndexOf(" ");
-                                if (index != -1)
-                                {
-                                    stringIpAddress.Substring(0, index);
-                                }
-                            }
-                            break;
-                        //other  
-                    }
-                }
+                html = client.DownloadString("http://www.ip138.com/ips1388.asp?ip=" + m_IpAddress + "&action=2");
+                
             }
-            return stringIpAddress;
+            catch (Exception ex)
+            {
+                html = client.DownloadString("http://www.ip138.com/ips1388.asp?ip=" + m_IpAddress + "&action=2");
+            }
+            
+            string p = @"<li>本站主数据：(?<location>[^<>]+?)</li>";                        
+
+            Match match = Regex.Match(html, p);                                        
+            string m_Location = match.Groups["location"].Value.Trim();
+            int index = m_Location.IndexOf(" ");
+            if (index != -1)
+            {
+                m_Location = m_Location.Substring(0, index);
+            }  
+            return m_Location;
         }  
     }
 }

@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Data;
 
 namespace PingTest
 {
@@ -26,6 +27,22 @@ namespace PingTest
         private void AddIpButton_Click(object sender, RoutedEventArgs e)
         {
             new AddIpWindow().ShowDialog();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            IplistView.ItemsSource = PublicClass.ipsDataTable;
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            while (IplistView.SelectedItems.Count>0)
+            {
+                DataRowView rowveiw = (DataRowView)IplistView.SelectedItems[0];
+                rowveiw.Delete();
+            }
+            DatabaseDataSetTableAdapters.ipsTableAdapter ipsTa = new DatabaseDataSetTableAdapters.ipsTableAdapter();
+            ipsTa.Update(PublicClass.ipsDataTable);
         }
     }
 }

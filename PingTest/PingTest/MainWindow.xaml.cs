@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace PingTest
 {
@@ -27,6 +28,15 @@ namespace PingTest
         private void IpListButton_Click(object sender, RoutedEventArgs e)
         {
             new IpListWindow().ShowDialog();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            PublicClass.ipsDataTable = new DatabaseDataSet.ipsDataTable();
+            DatabaseDataSetTableAdapters.ipsTableAdapter ipsTa = new DatabaseDataSetTableAdapters.ipsTableAdapter();
+            ipsTa.Fill(PublicClass.ipsDataTable);
+            PublicClass.UpdateCountry();
+            CountryComboBox.ItemsSource = PublicClass.dtlWof;
         }
     }
 }
